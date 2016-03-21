@@ -8,7 +8,7 @@
 
 ① System StatusBar 系统默认的状态栏
 
-② System Toolbar 主题携带的标题栏
+② System Toolbar 主题携带的标题栏（一般更多称为`ActionBar` ，为了体现时代性，本文称为 Toolbar，或者统一描述为 TitleBar）。
 
 ③ Custom StatusBar 使用 CoordinatorLayout 携带的状态栏，一般和 ④ 一块使用。
 
@@ -31,6 +31,8 @@
 ⑥ NavigationBar 导航栏
 
 指的是虚拟按键，不是实体按键。
+
+StatusBar、ActionBar 和 NavigationBar 合称 `SystemBar` 。
 
 
 
@@ -93,10 +95,37 @@
    ```
 
    由于在 API 17 及以上才能使用，还不如直接使用 DecorView 来获取。
+6. `uiOptions` ：通过 `getWindow().getDecorView().getSystemUiVisibility()` 获取，包含了一些系统部件的显示状态。也可以使用 `setSystemUiVisability()` 设置 `uiOptions` 。
+
+   我们先看看默认的界面：
+
+   ![normal-immersive-mode](image/normal-immersive-mode.png)
+
+   ​
+
+   - `SYSTEM_UI_FLAG_LOW_PROFILE` ：淡化状态栏，此时状态栏颜色会变暗，显示的图标也会变少。Requires API level 14。
+
+     ![low-profile-immersive-mode](image/low-profile-immersive-mode.png)
+
+   - `SYSTEM_UI_FLAG_HIDE_NAVIGATION` ：临时隐藏导航栏，当用户点击屏幕时，导航栏会恢复。![](image/hide-navigation-bar-immersive-mode.png)
+
+   - `SYSTEM_UI_FLAG_FULLSCREEN` ：隐藏状态栏。显示效果与`WindowManager.LayoutParams.FLAG_FULLSCREEN` 相同。但使用 `SYSTEM_UI_FLAG_FULLSCREEN` 时，如果用户在屏幕顶部下滑时或者切换到其他应用，状态栏会重新显示。而 `WindowManager.LayoutParams.FLAG_FULLSCREEN` 状态则是稳定的，要恢复时需要应用手动清除标志。
+
+     ![hide-status-bar-immersive-mode](image/hide-status-bar-immersive-mode.png)
+
+   - `SYSTEM_UI_FLAG_LAYOUT_STABLE` ：
+
+
+
+ 
+
+
+
+
+
 
 
 
 ## 部件尺寸的计算
 
 ### System StatusBar
-
