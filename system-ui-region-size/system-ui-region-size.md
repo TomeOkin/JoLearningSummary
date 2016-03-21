@@ -48,7 +48,7 @@ StatusBar、ActionBar 和 NavigationBar 合称 `SystemBar` 。
 
 1. `DecorView` ：整个界面，在 onCreate() 执行后，可以通过 `getWindow().getDecorView()` 获得，进而获得 Width、Height 大小。在 view 中也可以通过 `getRootView()` 获得。
 
-2. `WindowVisibleDisplayFrame` ：包括 ②、③、④、⑤ 四个部分，即除了系统的状态栏和虚拟按键外的全部区域。可以通过 `getWindow().getDecorView().getWindowVisibleDisplayFrame(rect)` 获得该区域的位置矩形，格式如下：`Rect(0, 50 - 720, 1184)` 。
+2. `WindowVisibleDisplayFrame` ：当使用 SystemToolbar 时，包括 ②、③、④、⑤ 四个部分，当使用CustomToolbar 时，包括 ④ 和 ⑤ 两个区域，即除了状态栏和虚拟按键以内的全部区域。这是比较特殊的。可以通过 `getWindow().getDecorView().getWindowVisibleDisplayFrame(rect)` 获得该区域的位置矩形，格式如下：`Rect(0, 50 - 720, 1184)` 。
 
 3. `Window.ID_ANDROID_CONTENT` ：上文提到的，对应的 Framelayout 由 ③、④、⑤ 三部分组成。
 
@@ -172,5 +172,79 @@ StatusBar、ActionBar 和 NavigationBar 合称 `SystemBar` 。
 
 ## 部件尺寸的计算
 
-### System StatusBar
+### StatusBar
+
+通过上面的介绍，可以知道，获得当前状态下 StatusBar 的大小，可以使用
+
+```java
+Rect rect = new Rect();
+getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
+Log.i(TAG, "WindowVisibleDisplayFrame.Top: " + rect.top);
+```
+
+由于 StatusBar 的高度对于一个设置而言，也是固定的，可以使用如下方式获取：
+
+```java
+int uiOptions = getWindow().getDecorView().getSystemUiVisibility();
+if ((uiOptions & View.SYSTEM_UI_FLAG_FULLSCREEN) != View.SYSTEM_UI_FLAG_FULLSCREEN) {
+  Log.i(TAG, "show status bar");
+
+  Resources res = getResources();
+  int statusBarHeight = 0;
+  // com.android.internal.R.dimen.status_bar_height
+  int resId = res.getIdentifier("status_bar_height", "dimen", "android");
+  if (resId > 0) {
+    statusBarHeight = res.getDimensionPixelSize(resId);
+  }
+  Log.i(TAG, "res.status_bar_height: " + statusBarHeight);
+} else {
+  Log.i(TAG, "hide status bar");
+}
+```
+
+
+
+### NavigationBar
+
+这个则处理起来相对比较麻烦。
+
+1. 我们需要先检查设备是否有 NavigationBar。
+
+   ```java
+   public void checkNavigationBar() {
+     Resources res = mView.getResources();
+     int idShow = res.getIdentifier("config_showNavigationBar", "bool", "android");
+     if (idShow > 0) {
+       mHasNavigationBar = res.getBoolean(idShow);
+
+       try {
+         Class<?> systemPropertiesClass = Class.forName("android.os.SystemProperties");
+         Method m = systemPropertiesClass.getMethod("get", String.class);
+         String navBarOverride = (String) m.invoke(systemPropertiesClass, "qemu.hw.mainkeys");
+         if ("1".equals(navBarOverride)) {
+           mHasNavigationBar = false;
+         } else if ("0".equals(navBarOverride)) {
+           mHasNavigationBar = true;
+         }
+       } catch (Exception e) {
+       }
+     }
+   }
+   ```
+
+2. 检查是否显示 NavigationBar。
+
+```java
+public boolean showNavigationBar() {
+  // must getRootView, otherwise is value will not be refresh instantly
+  int uiOptions = mView.getRootView().getSystemUiVisibility();
+  return (uiOptions & SYSTEM_UI_FLAG_HIDE_NAVIGATION) != SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+}
+```
+
+注意哦，这里必须使用 `getRootView()` 来获得 uiOptions，否则拿到的是当前 View 缓存的副本，不一定是最新的状态，更加详细的描述，建议查看 [罗升阳](http://my.csdn.net/Luoshengyang) 老师的[Android窗口管理服务WindowManagerService计算Activity窗口大小的过程分析](http://blog.csdn.net/luoshengyang/article/details/8479101)
+
+在讲第 3 步前，需要先穿插点背景知识。
+
+还记得文章一开头的结构图吗？对，NavigationBar 的位置不是固定的。
 
