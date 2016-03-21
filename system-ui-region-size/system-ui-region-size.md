@@ -103,7 +103,7 @@ StatusBar、ActionBar 和 NavigationBar 合称 `SystemBar` 。
 
    ​
 
-   - `SYSTEM_UI_FLAG_LOW_PROFILE` ：淡化状态栏，此时状态栏颜色会变暗，显示的图标也会变少。Requires API level 14。
+   - `SYSTEM_UI_FLAG_LOW_PROFILE` ：淡化状态栏，此时状态栏、虚拟按键颜色会变暗，显示的图标也会变少。Requires API level 14。
 
      ![low-profile-immersive-mode](image/low-profile-immersive-mode.png)
 
@@ -113,19 +113,64 @@ StatusBar、ActionBar 和 NavigationBar 合称 `SystemBar` 。
 
      ![hide-status-bar-immersive-mode](image/hide-status-bar-immersive-mode.png)
 
-   - `SYSTEM_UI_FLAG_LAYOUT_STABLE` ：
+     当隐藏状态栏时，系统会重新调整界面，这时，状态栏会先变成白条，解决这个问题，有几种方案。一种是使用 Overlay 系列的主题，包括自定义 Toolbar 时给 AppBar 和 ToolBar 加 Overlay 风格的主题。这时当状态栏隐藏时，将状态栏设置为 Toolbar 的颜色，尺寸不变。
+
+     ```xml
+     <android.support.design.widget.AppBarLayout
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:theme="@style/AppTheme.AppBarOverlay"
+         >
+
+       <android.support.v7.widget.Toolbar
+           android:id="@+id/toolbar"
+           android:layout_width="match_parent"
+           android:layout_height="?attr/actionBarSize"
+           app:popupTheme="@style/AppTheme.PopupOverlay"
+           />
+
+     </android.support.design.widget.AppBarLayout>
+     ```
+
+     另一种是设置 `SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN` 和 `SYSTEM_UI_FLAG_LAYOUT_STABLE` 。前者允许页面的内容显示在 Toolbar 下方，后者使得页面内容尺寸不发生变化。
+
+     同样对于 NavigationBar，也可以设置 `SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION` 和 `SYSTEM_UI_FLAG_LAYOUT_STABLE` 。
+
+   - `SYSTEM_UI_FLAG_LAYOUT_STABLE` 
+   - `SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION`
+   - `SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN`
+   - `SYSTEM_UI_FLAG_IMMERSIVE` ：全屏沉浸模式，与 `SYSTEM_UI_FLAG_HIDE_NAVIGATION` 和 `SYSTEM_UI_FLAG_FULLSCREEN` 配合使用。可以通过下拉状态栏或上拉导航栏恢复。
+
+     ![immersive-mode](image/immersive-mode.png)
+
+     如果只设置了 `SYSTEM_UI_FLAG_HIDE_NAVIGATION` 和 `SYSTEM_UI_FLAG_FULLSCREEN` 则称其为 `LeanBack mode` ，点击屏幕就会恢复。
+   - `SYSTEM_UI_FLAG_IMMERSIVE_STICKY` ：粘合全屏沉浸模式，与 `SYSTEM_UI_FLAG_HIDE_NAVIGATION` 和 `SYSTEM_UI_FLAG_FULLSCREEN` 配合使用。可以通过下拉状态栏或上拉导航栏恢复，不过会显示为暗色，点击屏幕或者稍微等待又会回到隐藏状态。
+
+     ![stick-in-immersive-mode](image/stick-in-immersive-mode.png)
+   ​
+
+   可以通过设置 `View.OnSystemUiVisibilityChangeListener` 监听系统部件状态的变化。
 
 
-
- 
-
-
-
-
-
+> 更多的信息，查看：
+>
+> [Dimming the System Bars | Android Developers](http://developer.android.com/training/system-ui/dim.html)
+>
+> [Hiding the Status Bar | Android Developers](http://developer.android.com/training/system-ui/status.html)
+>
+> [Using Immersive Full-Screen Mode | Android Developers](http://developer.android.com/training/system-ui/immersive.html)
+>
+> [googlesamples/android-BasicImmersiveMode](https://github.com/googlesamples/android-BasicImmersiveMode/)
+>
+> [googlesamples/android-ImmersiveMode](https://github.com/googlesamples/android-ImmersiveMode/)
+>
+> [googlesamples/android-AdvancedImmersiveMode](https://github.com/googlesamples/android-AdvancedImmersiveMode) 上两个示例东西很少，可以直接看这个。
+>
+> [[Android] 关于系统工具栏和全屏沉浸模式](http://www.wossoneri.com/2015/04/12/[Android]%20%E5%85%B3%E4%BA%8E%E7%B3%BB%E7%BB%9F%E5%B7%A5%E5%85%B7%E6%A0%8F%E5%92%8C%E5%85%A8%E5%B1%8F%E6%B2%89%E6%B5%B8%E6%A8%A1%E5%BC%8F/) 
 
 
 
 ## 部件尺寸的计算
 
 ### System StatusBar
+
