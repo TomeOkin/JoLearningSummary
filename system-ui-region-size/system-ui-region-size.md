@@ -147,7 +147,7 @@ StatusBar、ActionBar 和 NavigationBar 合称 `SystemBar` 。
    - `SYSTEM_UI_FLAG_IMMERSIVE_STICKY` ：粘合全屏沉浸模式，与 `SYSTEM_UI_FLAG_HIDE_NAVIGATION` 和 `SYSTEM_UI_FLAG_FULLSCREEN` 配合使用。可以通过下拉状态栏或上拉导航栏恢复，不过会显示为暗色，点击屏幕或者稍微等待又会回到隐藏状态。
 
      ![stick-in-immersive-mode](image/stick-in-immersive-mode.png)
-   ​
+     ​
 
    可以通过设置 `View.OnSystemUiVisibilityChangeListener` 监听系统部件状态的变化。
 
@@ -246,5 +246,64 @@ public boolean showNavigationBar() {
 
 在讲第 3 步前，需要先穿插点背景知识。
 
-还记得文章一开头的结构图吗？对，NavigationBar 的位置不是固定的。
+还记得文章一开头的结构图吗？对，NavigationBar 的位置不是固定的。存在几种情况：
+
+① 平板类型：竖屏时取值由 `com.android.internal.R.dimen.navigation_bar_height` 决定，横屏时取值由`com.android.internal.R.dimen.navigation_bar_height_landscape` 决定。
+
+② 手机类型：竖屏时取值也是由 `com.android.internal.R.dimen.navigation_bar_height` 决定，横屏时取值由 `com.android.internal.R.dimen.navigation_bar_width` 决定，此时对应结构图右边的情形。
+
+那么如何确定是否是平板呢？有如下方式可以确定：
+
+```java
+public boolean isTablet() {
+  return (mView.getResources().getConfiguration().screenLayout
+      & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+}
+```
+
+这里采用 `getSize(out)` 方式的写法，用 x 表示宽，用 y 表示高：
+
+```java
+public void getNavigationBarSize(Point out) {
+  if (isTablet()) {
+    if (mHasNavigationBar && showNavigationBar()) {
+      // com.android.internal.R.dimen.navigation_bar_height
+      // com.android.internal.R.dimen.navigation_bar_height_landscape
+      resId = res.getIdentifier(
+          orientation == Configuration.ORIENTATION_PORTRAIT ? "navigation_bar_height"
+              : "navigation_bar_height_landscape", "dimen", "android");
+      out.x = getWidth();
+      out.y = getSizeFromResource(resId);
+    }
+  } else {
+    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+      if (mHasNavigationBar && showNavigationBar()) {
+        resId = res.getIdentifier("navigation_bar_height", "dimen", "android");
+        out.x = getWidth();
+        out.y = getSizeFromResource(resId);
+      }
+    } else {
+      // com.android.internal.R.dimen.navigation_bar_width
+      if (mHasNavigationBar && !showNavigationBar()) {
+        resId = res.getIdentifier("navigation_bar_width", "dimen", "android");
+        out.x = getSizeFromResource(resId);
+        out.y = getHeight();
+      }
+    }
+  }
+}
+
+private int getSizeFromResource(int id) {
+  int size = 0;
+  if (id > 0) {
+    size = mView.getResources().getDimensionPixelSize(id);
+  }
+
+  return size;
+}
+```
+
+### Toolbar
+
+这个相对比较简单，不过需要用到 activity 的实例，使用 `getSupportActionBar().isShowing()` 可以判断是否显示，通过 `getHeight()` 、`getWidth()`  方法来获取宽高。
 
