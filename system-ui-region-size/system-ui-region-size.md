@@ -50,7 +50,7 @@ StatusBar、ActionBar 和 NavigationBar 合称 `SystemBar` 。
 
 2. `WindowVisibleDisplayFrame` ：当使用 SystemToolbar 时，包括 ②、③、④、⑤ 四个部分，当使用CustomToolbar 时，包括 ④ 和 ⑤ 两个区域，即除了状态栏和虚拟按键以内的全部区域。这是比较特殊的。可以通过 `getWindow().getDecorView().getWindowVisibleDisplayFrame(rect)` 获得该区域的位置矩形，格式如下：`Rect(0, 50 - 720, 1184)` 。
 
-3. `Window.ID_ANDROID_CONTENT` ：上文提到的，对应的 Framelayout 由 ③、④、⑤ 三部分组成。
+3. `Window.ID_ANDROID_CONTENT` ：也就是 `android.R.id.content`，上文提到的，对应的 Framelayout 由 ③、④、⑤ 三部分组成。
 
    当添加一个 View，包括其父 View 在内，都使用 `match_parent` 标志宽高时，onMeasure() 执行后，我们也可以通过 `getWidth()` 和 `getHeight()` 获得 ③、④、⑤ 三个部分的宽高，不过 `getTop()` 获取到的值为 0 ，这就没什么用。
 
@@ -306,4 +306,3 @@ private int getSizeFromResource(int id) {
 ### Toolbar
 
 这个相对比较简单，不过需要用到 activity 的实例，使用 `getSupportActionBar().isShowing()` 可以判断是否显示，通过 `getHeight()` 、`getWidth()`  方法来获取宽高。
-
