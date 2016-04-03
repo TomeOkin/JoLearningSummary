@@ -202,6 +202,7 @@ if ((uiOptions & View.SYSTEM_UI_FLAG_FULLSCREEN) != View.SYSTEM_UI_FLAG_FULLSCRE
 }
 ```
 
+需要注意的是，当设置 `WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS` 或者在主题中设置 `android:windowTranslucentStatus` 为 true 时，`rect.top` 的值为 0。
 
 
 ### NavigationBar
